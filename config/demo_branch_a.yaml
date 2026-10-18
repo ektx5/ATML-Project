@@ -1,0 +1,61 @@
+# ============================================================
+# Demo Fast Training Config: Branch A (Spoof Detector)
+# Perfect for live classroom / viva demonstration (< 10 seconds)
+# ============================================================
+
+seed: 42
+device: "cpu"
+
+data:
+  train_dir: "datasets/demo_data/asvspoof/train"
+  dev_dir:   "datasets/demo_data/asvspoof/dev"
+  eval_dir:  "datasets/demo_data/asvspoof/dev"
+  train_protocol: "datasets/demo_data/asvspoof/protocols/train.trn.txt"
+  dev_protocol:   "datasets/demo_data/asvspoof/protocols/dev.trl.txt"
+  eval_protocol:  "datasets/demo_data/asvspoof/protocols/dev.trl.txt"
+  in_the_wild_dir: "datasets/demo_data/asvspoof/dev"
+  in_the_wild_meta: "datasets/demo_data/asvspoof/protocols/dev.trl.txt"
+
+audio:
+  sample_rate: 16000
+  max_duration_s: 2.0
+  n_mels: 80
+  n_fft: 512
+  hop_length: 160
+  win_length: 400
+  fmin: 20
+  fmax: 7600
+
+backbone:
+  name: "cnn_attention"
+  output_dim: 256
+
+attention_pooling:
+  num_heads: 8
+  embed_dim: 256
+  dropout: 0.1
+
+head:
+  hidden_dim: 128
+  dropout: 0.2
+  num_classes: 2
+
+training:
+  epochs: 5
+  batch_size: 4
+  learning_rate: 1.0e-3
+  weight_decay: 1.0e-4
+  gradient_clip_norm: 5.0
+  use_class_weights: true
+  balanced_sampler: false
+
+logging:
+  backend: "tensorboard"
+  project: "voice-clone-guard"
+  run_name: "demo_branch_a"
+
+checkpoints:
+  dir: "checkpoints/branch_a"
+  save_top_k: 1
+  monitor: "val_eer"
+  mode: "min"

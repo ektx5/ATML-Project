@@ -1,0 +1,31 @@
+# ============================================================
+# Demo Fast Training Config: Autoencoder & Fusion
+# ============================================================
+
+seed: 42
+device: "cpu"
+
+autoencoder:
+  checkpoint: "checkpoints/autoencoder/best.pt"
+  reconstruction_normalization: "z_score"
+
+branch_a:
+  checkpoint: "checkpoints/branch_a/best.pt"
+  config: "config/demo_branch_a.yaml"
+
+branch_b:
+  checkpoint: "checkpoints/branch_b/best.pt"
+  config: "config/demo_branch_b.yaml"
+  enrollment_store: "checkpoints/branch_b/enrollments.pkl"
+  eer_threshold: null
+
+fusion:
+  method: "weighted_sum"
+  weighted_sum:
+    w_spoof: 0.5
+    w_ae_error: 0.2
+    w_speaker_mismatch: 0.3
+  verdict:
+    low_risk_below: 30
+    medium_risk_below: 60
+    high_risk_above: 60

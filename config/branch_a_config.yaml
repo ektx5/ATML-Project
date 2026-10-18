@@ -1,0 +1,78 @@
+# ============================================================
+# Branch A — Spoof / Deepfake Detector Configuration
+# ATML Unit 3 (GANs) + Unit 4 (Attention)
+# ============================================================
+
+# ----- Reproducibility -----
+seed: 42
+
+# ----- Device -----
+device: "cpu"   # "cuda" | "cpu" (auto-fallback if cuda unavailable)
+
+# ----- Dataset paths -----
+data:
+  train_dir: "datasets/ASVspoof2019_LA/ASVspoof2019_LA_train/flac"
+  dev_dir:   "datasets/ASVspoof2019_LA/ASVspoof2019_LA_dev/flac"
+  eval_dir:  "datasets/ASVspoof2019_LA/ASVspoof2019_LA_eval/flac"
+  train_protocol: "datasets/ASVspoof2019_LA/ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.train.trn.txt"
+  dev_protocol:   "datasets/ASVspoof2019_LA/ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.dev.trl.txt"
+  eval_protocol:  "datasets/ASVspoof2019_LA/ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.eval.trl.txt"
+  in_the_wild_dir: "datasets/in-the-wild"       # OOD eval only — never train/val here
+  in_the_wild_meta: "datasets/in-the-wild/meta.csv"
+
+# ----- Audio preprocessing -----
+audio:
+  sample_rate: 16000
+  max_duration_s: 3.0        # clip/pad to this length
+  n_mels: 80
+  n_fft: 512
+  hop_length: 160
+  win_length: 400
+  fmin: 20
+  fmax: 7600
+
+# ----- Backbone -----
+# Set name to "wav2vec2" (facebook/wav2vec2-base) or "cnn_attention" (from-scratch CNN)
+backbone:
+  name: "cnn_attention"      # "wav2vec2" | "cnn_attention"
+  pretrained_model: "facebook/wav2vec2-base"
+  freeze_layers: 6           # freeze first N transformer layers
+  output_dim: 256            # 256 for cnn_attention, 768 for wav2vec2-base
+
+# ----- Attention Pooling (ATML Unit 4 Course Requirement) -----
+attention_pooling:
+  num_heads: 8
+  embed_dim: 256             # must match backbone output_dim (256 or 768)
+  dropout: 0.1
+
+# ----- Classifier Head -----
+head:
+  hidden_dim: 128
+  dropout: 0.3
+  num_classes: 2             # bonafide vs. spoof
+
+# ----- Training -----
+training:
+  epochs: 25
+  batch_size: 32
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-4
+  scheduler: "cosine"
+  warmup_epochs: 2
+  gradient_clip_norm: 5.0
+  use_class_weights: true
+  balanced_sampler: false
+
+# ----- Logging -----
+logging:
+  backend: "tensorboard"     # "wandb" | "tensorboard"
+  project: "voice-clone-guard"
+  run_name: "branch_a_model"
+  log_every_n_steps: 50
+
+# ----- Checkpointing -----
+checkpoints:
+  dir: "checkpoints/branch_a"
+  save_top_k: 3
+  monitor: "val_eer"
+  mode: "min"

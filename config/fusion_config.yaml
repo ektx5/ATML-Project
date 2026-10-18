@@ -1,0 +1,54 @@
+# ============================================================
+# Fusion Layer + Autoencoder Configuration
+# ============================================================
+
+seed: 42
+device: "cuda"
+
+# ----- Autoencoder (ATML Unit 2: anomaly detection) -----
+autoencoder:
+  checkpoint: "checkpoints/autoencoder/best.pt"
+  # Reconstruction error normalization: computed from bonafide val split mean/std
+  # stored alongside the checkpoint as autoencoder_stats.json
+  reconstruction_normalization: "z_score"   # "z_score" | "minmax"
+
+# ----- Branch A -----
+branch_a:
+  checkpoint: "checkpoints/branch_a/best.pt"
+  config: "config/branch_a_config.yaml"
+
+# ----- Branch B -----
+branch_b:
+  checkpoint: "checkpoints/branch_b/best.pt"
+  config: "config/branch_b_config.yaml"
+  # Enrollment store (persisted speaker embeddings)
+  enrollment_store: "checkpoints/branch_b/enrollments.pkl"
+  eer_threshold: null        # null = load from checkpoints/branch_b/eer_threshold.json
+
+# ----- Fusion -----
+fusion:
+  method: "logistic"         # "logistic" | "weighted_sum"
+
+  # Logistic regression — weights learned from a small labeled calibration set
+  # (e.g. 200 ASVspoof dev + VoxCeleb val samples with ground-truth labels)
+  logistic:
+    calibration_data: "datasets/fusion_calibration.csv"   # columns: spoof_prob, ae_error_norm, speaker_sim, label
+    model_path: "checkpoints/fusion/lr_fusion.pkl"
+
+  # Weighted sum (explainable fallback, hand-tuned)
+  weighted_sum:
+    w_spoof: 0.5
+    w_ae_error: 0.2
+    w_speaker_mismatch: 0.3
+
+  # Thresholds for the final risk verdict string
+  verdict:
+    low_risk_below: 30       # score < 30  -> "LOW RISK"
+    medium_risk_below: 60    # score < 60  -> "MEDIUM RISK"
+    high_risk_above: 60      # score >= 60 -> "HIGH RISK — flag for human review"
+
+# ----- Logging -----
+logging:
+  backend: "wandb"
+  project: "voice-clone-guard"
+  run_name: "fusion_eval"

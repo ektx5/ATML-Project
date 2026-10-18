@@ -1,0 +1,2 @@
+dataset,eer_percent,threshold,auc,evaluated_pairs
+VoxCeleb1_veri_test,0.0,0.9926,1.0,4

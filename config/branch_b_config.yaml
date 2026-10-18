@@ -1,0 +1,75 @@
+# ============================================================
+# Branch B — Speaker Verification Configuration
+# ATML Unit 1: Siamese networks + few-shot / meta-learning
+# ============================================================
+
+seed: 42
+device: "cuda"
+
+# ----- Dataset -----
+data:
+  voxceleb1_root: "datasets/VoxCeleb1"
+  veri_test_pairs: "datasets/VoxCeleb1/veri_test.txt"   # official verification pairs for EER
+  num_train_speakers: 300    # subset of the full VoxCeleb1 catalogue (1251 speakers)
+  train_split: 0.9
+
+# ----- Audio preprocessing (should mirror branch_a for consistency) -----
+audio:
+  sample_rate: 16000
+  max_duration_s: 3.0
+  n_mels: 80
+  n_fft: 512
+  hop_length: 160
+  win_length: 400
+  fmin: 20
+  fmax: 7600
+
+# ----- Encoder architecture -----
+encoder:
+  type: "ecapa_tdnn"         # "ecapa_tdnn" | "resnet1d"
+  # ECAPA-TDNN options
+  channels: 512
+  embedding_dim: 192
+  # ResNet-1D fallback options (used when ecapa_tdnn unavailable)
+  resnet_layers: [3, 4, 6, 3]
+  resnet_base_channels: 64
+
+# ----- Loss function -----
+loss:
+  type: "triplet"            # "triplet" | "contrastive"
+  # Triplet loss
+  margin: 0.2
+  mining: "semihard"         # "semihard" | "hardest" | "all"
+  # Contrastive loss
+  contrastive_margin: 1.0
+
+# ----- Training -----
+training:
+  epochs: 50
+  batch_size: 64
+  learning_rate: 1.0e-3
+  weight_decay: 1.0e-4
+  scheduler: "cosine"
+  warmup_epochs: 5
+  gradient_clip_norm: 5.0
+  utterances_per_speaker: 10  # per batch construction for triplet mining
+
+# ----- Verification -----
+verification:
+  eer_threshold_method: "val_eer"   # tune on val set, not hardcoded
+  enrollment_clips_min: 3
+  enrollment_clips_max: 5
+
+# ----- Logging -----
+logging:
+  backend: "wandb"
+  project: "voice-clone-guard"
+  run_name: "branch_b_ecapa"
+  log_every_n_steps: 50
+
+# ----- Checkpointing -----
+checkpoints:
+  dir: "checkpoints/branch_b"
+  save_top_k: 3
+  monitor: "val_eer"
+  mode: "min"

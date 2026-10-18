@@ -1,0 +1,52 @@
+# ============================================================
+# Demo Fast Training Config: Branch B (Speaker Verifier)
+# Perfect for live classroom / viva demonstration (< 10 seconds)
+# ============================================================
+
+seed: 42
+device: "cpu"
+
+data:
+  voxceleb1_root: "datasets/demo_data/voxceleb"
+  veri_test_pairs: "datasets/demo_data/voxceleb/veri_test.txt"
+  num_train_speakers: 3
+  train_split: 0.8
+
+audio:
+  sample_rate: 16000
+  max_duration_s: 2.0
+  n_mels: 80
+  n_fft: 512
+  hop_length: 160
+  win_length: 400
+  fmin: 20
+  fmax: 7600
+
+encoder:
+  type: "ecapa_tdnn"
+  channels: 128
+  embedding_dim: 192
+
+loss:
+  type: "triplet"
+  margin: 0.2
+  mining: "semihard"
+  contrastive_margin: 1.0
+
+training:
+  epochs: 5
+  batch_size: 4
+  learning_rate: 1.0e-3
+  weight_decay: 1.0e-4
+  gradient_clip_norm: 5.0
+
+verification:
+  eer_threshold_method: "val_eer"
+  enrollment_clips_min: 3
+  enrollment_clips_max: 5
+
+checkpoints:
+  dir: "checkpoints/branch_b"
+  save_top_k: 1
+  monitor: "val_eer"
+  mode: "min"

@@ -1,0 +1,2 @@
+dataset,eer_percent,threshold,auc,f1,accuracy,total_samples
+branch_a_asvspoof_eval,0.0,0.659,1.0,1.0,1.0,8

@@ -1,0 +1,5 @@
+System Configuration,EER (%),AUC
+Full System (All 3 Signals),0.0,1.0
+Without Autoencoder Signal,0.0,1.0
+Without Branch B (Speaker),0.0,1.0
+Without Branch A (Spoof),0.0,1.0

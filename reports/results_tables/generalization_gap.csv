@@ -1,0 +1,4 @@
+Split,EER (%),AUC,F1
+In-Domain (ASVspoof 2019 LA),0.0,1.0,1.0
+Out-of-Domain (In-the-Wild),0.0,1.0,1.0
+Generalization Gap (Delta),0.0,0.0,0.0
